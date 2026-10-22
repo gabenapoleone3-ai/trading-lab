@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "retrievedAt": "2026-10-22T23:16:37.861Z",
+  "archiveCommit": "e6d86a3ac3dc507b26e27b1f20c2949a69438ef7",
+  "assets": [
+    {
+      "symbol": "SPY",
+      "name": "SPDR S&P 500 ETF Trust",
+      "type": "ETF",
+      "source": "QuantStart QSTrader historical CSV archive",
+      "sourceUrl": "https://raw.githubusercontent.com/quantstart/qstrader/e6d86a3ac3dc507b26e27b1f20c2949a69438ef7/data/SPY.csv",
+      "sha256": "0968f804c2594ec6fd2d0624e4271b8e351169946260f31e32c6048189ec8098",
+      "firstDate": "2000-01-03",
+      "lastDate": "2016-01-04",
+      "rows": 4026,
+      "priceBasis": "Provider adjusted close; OHLC scaled by adjusted close / raw close"
+    },
+    {
+      "symbol": "AGG",
+      "name": "iShares Core U.S. Aggregate Bond ETF",
+      "type": "ETF",
+      "source": "QuantStart QSTrader historical CSV archive",
+      "sourceUrl": "https://raw.githubusercontent.com/quantstart/qstrader/e6d86a3ac3dc507b26e27b1f20c2949a69438ef7/data/AGG.csv",
+      "sha256": "40884abfce659d6b0569d32b9e02f776a1c942e34b8db4640d7ba2f5f2210ad9",
+      "firstDate": "2006-11-01",
+      "lastDate": "2016-10-13",
+      "rows": 2505,
+      "priceBasis": "Provider adjusted close; OHLC scaled by adjusted close / raw close"
+    },
+    {
+      "symbol": "AAPL",
+      "name": "Apple Inc.",
+      "type": "Stock",
+      "source": "QuantStart QSTrader historical CSV archive",
+      "sourceUrl": "https://raw.githubusercontent.com/quantstart/qstrader/e6d86a3ac3dc507b26e27b1f20c2949a69438ef7/data/AAPL.csv",
+      "sha256": "0a953d91cd4cf04bc4e8f01e3dae44607242d93a0f04c7c9553f162c35dbd735",
+      "firstDate": "2000-01-03",
+      "lastDate": "2016-01-04",
+      "rows": 4026,
+      "priceBasis": "Provider adjusted close; OHLC scaled by adjusted close / raw close"
+    }
+  ]
+}

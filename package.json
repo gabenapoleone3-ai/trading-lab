@@ -1,0 +1,6 @@
+{
+  "name": "trading-lab", "version": "1.0.0", "private": true, "type": "module",
+  "scripts": { "dev": "vite --host 0.0.0.0", "build": "tsc -b && vite build", "preview": "vite preview --host 0.0.0.0", "test": "vitest run", "test:e2e": "playwright test", "data:refresh": "node scripts/refresh-data.mjs" },
+  "dependencies": { "react": "^19.2.0", "react-dom": "^19.2.0", "recharts": "^3.3.0" },
+  "devDependencies": { "@playwright/test": "^1.56.0", "@testing-library/react": "^16.3.0", "@testing-library/user-event": "^14.6.1", "@types/node": "^24.0.0", "@types/react": "^19.2.0", "@types/react-dom": "^19.2.0", "@vitejs/plugin-react": "^5.0.4", "jsdom": "^27.0.0", "typescript": "~5.9.3", "vite": "^7.1.12", "vitest": "^3.2.4" }
+}
