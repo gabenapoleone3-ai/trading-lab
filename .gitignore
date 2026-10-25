@@ -9,3 +9,6 @@ test-results/
 !.env.example
 runtime/
 *.log
+extension/build/
+releases/*.zip
+releases/*.sha256

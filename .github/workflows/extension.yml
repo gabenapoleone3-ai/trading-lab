@@ -1,0 +1,30 @@
+name: Build and test Chrome extension
+on:
+  push:
+    branches: [main]
+    paths: ['extension/**', 'scripts/build-extension.mjs', 'src/engine.ts', 'package*.json', '.github/workflows/extension.yml']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  extension:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run extension:build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run extension:test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: obsidian-chrome-extension
+          path: |
+            releases/obsidian-extension-v1.0.0.zip
+            releases/obsidian-extension-v1.0.0.zip.sha256

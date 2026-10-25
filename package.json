@@ -12,7 +12,9 @@
     "data:refresh": "node scripts/refresh-data.mjs",
     "bot:once": "node --use-env-proxy bot/main.ts --once",
     "bot:start": "node --use-env-proxy bot/main.ts",
-    "backtest:report": "node scripts/backtest-report.ts"
+    "backtest:report": "node scripts/backtest-report.ts",
+    "extension:build": "node scripts/build-extension.mjs",
+    "extension:test": "playwright test --config extension/playwright.config.ts"
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -24,10 +26,12 @@
     "@playwright/test": "^1.56.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/chrome": "^0.3.6",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
+    "esbuild": "^0.28.2",
     "jsdom": "^27.0.0",
     "typescript": "~5.9.3",
     "vite": "^7.1.12",

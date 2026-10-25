@@ -1,0 +1,6 @@
+import { z } from 'zod';
+import type { Forward } from './analysis';
+const finite=z.number().finite(),positive=finite.positive(),nonnegative=finite.nonnegative();
+const trade=z.object({time:nonnegative,side:z.enum(['BUY','SELL']),price:positive,units:positive,fee:nonnegative,reason:z.string(),pnl:finite.optional()});
+export const forwardSchema=z.object({version:z.literal(1),startedAt:nonnegative,lastBar:nonnegative,lastQuote:nonnegative,lastPrice:positive.nullable(),paused:z.boolean(),totals:z.object({peak:positive,drawdown:finite.min(-1).max(0),wins:nonnegative,closed:nonnegative,fees:nonnegative}),benchmark:z.object({cash:nonnegative,units:nonnegative}).nullable(),book:z.object({cash:finite.min(-.00001),units:nonnegative,cost:nonnegative,stop:positive.nullable(),target:positive.nullable(),trades:z.array(trade)}),signals:z.array(z.object({observedAt:nonnegative,barTime:nonnegative,signal:z.enum(['BUY','SELL','WAIT']),evidence:finite.min(0).max(5)})),curve:z.array(z.object({time:nonnegative,equity:positive,benchmark:positive.optional()}))});
+export function decodeForward(value:unknown):Forward {const state=forwardSchema.parse(value);if(state.totals.wins>state.totals.closed||state.book.units>0&&(state.book.stop===null||state.book.target===null))throw new Error('Invalid forward ledger. Export and explicitly reset it.');return state;}

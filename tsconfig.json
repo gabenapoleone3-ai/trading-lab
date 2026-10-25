@@ -25,6 +25,9 @@
     "vite.config.ts",
     "playwright.config.ts",
     "bot",
-    "scripts/backtest-report.ts"
+    "scripts/backtest-report.ts",
+    "extension/src",
+    "extension/vite.config.ts",
+    "extension/playwright.config.ts"
   ]
 }

@@ -1,0 +1,12 @@
+{
+ "manifest_version":3,"name":"Obsidian TradingView Companion","version":"1.0.0","minimum_chrome_version":"120",
+ "description":"Paper-only chart research with authorized market data, transparent signals and a synchronized companion chart.",
+ "permissions":["storage","alarms","sidePanel"],
+ "host_permissions":["https://data.alpaca.markets/*"],
+ "content_scripts":[{"matches":["https://www.tradingview.com/chart/*","https://tradingview.com/chart/*"],"js":["content.js"],"run_at":"document_idle"}],
+ "background":{"service_worker":"background.js","type":"module"},
+ "side_panel":{"default_path":"panel.html"},
+ "options_page":"options.html",
+ "action":{"default_title":"Open Obsidian chart companion"},
+ "content_security_policy":{"extension_pages":"script-src 'self'; object-src 'none'; connect-src https://data.alpaca.markets"}
+}

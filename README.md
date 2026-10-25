@@ -73,3 +73,7 @@ VITE_BASE_PATH=/trading-lab/ npm run preview -- --port 4174
 Tests cover indicator reference values and edge cases, next-session fills, future-data independence, warmup, both sides of fees/slippage, benchmark parity, drawdown, invalid inputs, overspending/overselling, replay chronology, current-date-only valuation, source archive integrity, mobile/desktop browser flows, persistence, corrupted storage, and network failure/retry. Synthetic fixtures exist only in tests and are not shipped as market data.
 
 The new worker uses the existing indicator and risk-planning code; it does not replace the functioning historical research or browser portfolio. Run `npm run bot:once` for a single cycle or `npm run bot:start` for the resident worker. Missing credentials produce a truthful blocked status and no broker writes. Runtime state is ignored by Git; only the deployment workflow publishes sanitized paper observations to its state branch.
+
+## Chrome TradingView companion
+
+The separate Manifest V3 extension adds a Supercharts signal badge and synchronized companion chart, authorized Alpaca/IEX data, multi-factor rule explanations, historical backtesting and separate forward-observed simulation. It has **no order-execution endpoint**. See [extension installation and methodology](extension/README.md). Build with `npm run extension:build`; run its isolated Chrome integration tests with `npm run extension:test`. The existing website and broker-paper worker remain separate.

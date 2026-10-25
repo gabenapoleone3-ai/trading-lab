@@ -1,0 +1,11 @@
+import {describe,it,expect,afterEach} from 'vitest';
+import {detectContext} from './context';
+const URL='https://www.tradingview.com/chart/example/?symbol=NASDAQ%3AAAPL';
+function fixture(count=1,symbol='AAPL',frame='D'){document.body.innerHTML=`<button data-name="header-toolbar-symbol-search">${symbol}</button><button data-name="header-toolbar-intervals">${frame}</button>`;for(let i=0;i<count;i++){const node=document.createElement('div');node.className='chart-container';node.getBoundingClientRect=()=>({width:800,height:600} as DOMRect);document.body.append(node);}}
+afterEach(()=>{document.body.innerHTML='';});
+describe('public visible chart context',()=>{
+ it('detects a single standard chart and updates when ticker/interval change without using page prices',()=>{fixture();expect(detectContext(document,URL)).toMatchObject({status:'ok',symbol:'AAPL',exchange:'NASDAQ',frame:'D'});fixture(1,'MSFT','15m');expect(detectContext(document,URL)).toMatchObject({status:'ok',symbol:'MSFT',exchange:'',frame:'15'});});
+ it('supports the current Supercharts toolbar IDs observed on the actual website',()=>{fixture();document.querySelector('[data-name="header-toolbar-symbol-search"]')!.id='header-toolbar-symbol-search';document.querySelector('#header-toolbar-symbol-search')!.removeAttribute('data-name');const interval=document.querySelector('[data-name="header-toolbar-intervals"]')!;interval.id='header-toolbar-intervals';interval.removeAttribute('data-name');interval.innerHTML='<button aria-haspopup="menu" aria-label="1 day"><div>D</div></button>';expect(detectContext(document,URL)).toMatchObject({status:'ok',symbol:'AAPL',frame:'D'});});
+ it('rejects unknown or multiple panes instead of guessing the active one',()=>{fixture(2);expect(detectContext(document,URL).status).toBe('unsupported');fixture(0);expect(detectContext(document,URL).status).toBe('unsupported');});
+ it('rejects synthetic charts, unsupported symbols and unreadable intervals',()=>{fixture(1,'BINANCE:BTCUSDT');expect(detectContext(document,URL).status).toBe('unsupported');fixture(1,'AAPL','10R');expect(detectContext(document,URL).status).toBe('unsupported');fixture();document.body.insertAdjacentHTML('beforeend','<button data-name="header-toolbar-chart-styles" title="Heikin Ashi"></button>');expect(detectContext(document,URL).status).toBe('unsupported');});
+});

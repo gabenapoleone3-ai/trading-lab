@@ -1,0 +1,19 @@
+import { useState } from 'react';
+import type { Decision,PriceBar } from './model';
+export function chartGeometry(bars:PriceBar[],levels:number[]=[]){
+ const min=Math.min(...bars.map(b=>b.low),...levels),max=Math.max(...bars.map(b=>b.high),...levels),padding=Math.max((max-min)*.12,max*.001),low=min-padding,high=max+padding;
+ return {x:(time:number)=>55+(bars.findIndex(b=>b.time===time)+.5)*775/bars.length,y:(price:number)=>20+(high-price)/(high-low)*260,low,high};
+}
+export default function Chart({bars,markers,decision}:{bars:PriceBar[];markers:{time:number;price:number;signal:string}[];decision:Decision}){
+ const [count,setCount]=useState(80),[hover,setHover]=useState<PriceBar|null>(null);const visible=bars.slice(-count);if(!visible.length)return <p>No provider bars available.</p>;
+ const levels=[decision.entry,decision.exit,decision.stop].filter((n):n is number=>n!==null),geometry=chartGeometry(visible,levels),width=Math.max(2,775/visible.length*.6);
+ return <section><label>Visible completed bars <input aria-label="Visible completed bars" type="range" min="20" max="200" value={count} onChange={e=>setCount(Number(e.target.value))}/></label><svg viewBox="0 0 900 330" role="img" aria-label="Synchronized companion candlestick chart. Marker coordinates use provider timestamps and prices, never TradingView canvas coordinates." onPointerMove={e=>{const box=e.currentTarget.getBoundingClientRect(),x=(e.clientX-box.left)/box.width*900,index=Math.max(0,Math.min(visible.length-1,Math.floor((x-55)/775*visible.length)));setHover(visible[index]);}} onPointerLeave={()=>setHover(null)}>
+ {[0,.25,.5,.75,1].map(r=>{const p=geometry.low+(geometry.high-geometry.low)*r,y=geometry.y(p);return <g key={r}><line x1="55" x2="830" y1={y} y2={y} stroke="#314053"/><text x="835" y={y+4} fill="#afbdcd" fontSize="13">{p.toFixed(2)}</text></g>;})}
+ {visible.map(b=>{const x=geometry.x(b.time),color=b.close>=b.open?'#53c6a5':'#ef8189';return <g key={b.time}><title>{new Date(b.time).toISOString()} · O {b.open} H {b.high} L {b.low} C {b.close} V {b.volume}</title><line x1={x} x2={x} y1={geometry.y(b.high)} y2={geometry.y(b.low)} stroke={color}/><rect x={x-width/2} width={width} y={geometry.y(Math.max(b.open,b.close))} height={Math.max(1,Math.abs(geometry.y(b.open)-geometry.y(b.close)))} fill={color}/></g>;})}
+ {markers.filter(m=>visible.some(b=>b.time===m.time)).map((m,i)=>{const x=geometry.x(m.time),y=geometry.y(m.price),buy=m.signal==='BUY';return <g key={i} data-marker-time={m.time} data-marker-price={m.price} transform={`translate(${x},${y})`}><title>{m.signal} setup at provider bar {new Date(m.time).toISOString()} / {m.price.toFixed(4)}</title><circle r="4" fill={buy?'#67ead0':'#ffacac'} stroke="#0b1421"/><text x="0" y={buy?22:-12} textAnchor="middle" fontSize="12" fontWeight="bold" fill={buy?'#67ead0':'#ffacac'}>{m.signal}</text></g>;})}
+ {[['Entry',decision.entry,'#83b6f3'],['Exit/target',decision.exit,'#53c6a5'],['Stop',decision.stop,'#ef8189']].map(([name,p,color])=>typeof p==='number'?<g key={name}><line x1="55" x2="830" y1={geometry.y(p)} y2={geometry.y(p)} stroke={color as string} strokeDasharray="6 5"/><text x="60" y={geometry.y(p)-5} fill={color as string} fontSize="12">{name} {p.toFixed(2)}</text></g>:null)}
+ {hover&&<line x1={geometry.x(hover.time)} x2={geometry.x(hover.time)} y1="20" y2="280" stroke="#a4b5ca" strokeDasharray="3 3"/>}
+ <text x="55" y="310" fill="#afbdcd" fontSize="12">{new Date(visible[0].time).toISOString().slice(0,16).replace('T',' ')} UTC</text><text x="830" y="310" textAnchor="end" fill="#afbdcd" fontSize="12">{new Date(visible.at(-1)!.time).toISOString().slice(0,16).replace('T',' ')} UTC</text></svg>
+ {hover&&<p className="fine">{new Date(hover.time).toISOString()} · O {hover.open.toFixed(2)} H {hover.high.toFixed(2)} L {hover.low.toFixed(2)} C {hover.close.toFixed(2)} · volume {hover.volume.toLocaleString()}</p>}
+ </section>;
+}
