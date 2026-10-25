@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { emptyState, publicStatus } from '../bot/state';
 test('research, strategies, backtest and source labels work',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.getByText('Historical archive — not live prices.')).toBeVisible();
@@ -31,4 +32,11 @@ test('invalid stored portfolio is preserved until explicit reset',async({page})=
 });
 test('network failure is visible and retry restores data',async({page})=>{
  await page.route('**/data/SPY.json',r=>r.abort());await page.goto('/');await expect(page.getByRole('heading',{name:'Historical data unavailable'})).toBeVisible();await page.unroute('**/data/SPY.json');await page.getByRole('button',{name:'Retry loading data'}).click();await expect(page.getByRole('heading',{name:'Price & moving averages'})).toBeVisible();
+});
+test('automation reports missing credentials honestly and separates historical performance',async({page})=>{
+ await page.route('**/automation/status.json',r=>r.fulfill({json:publicStatus(emptyState())}));
+ await page.goto('/');await page.getByRole('button',{name:'Automation',exact:true}).click();await expect(page.getByRole('heading',{name:'Automation control room.'})).toBeVisible();await expect(page.getByRole('heading',{name:'Worker: blocked'})).toBeVisible();await expect(page.getByText('No broker fills observed.')).toBeVisible();await expect(page.getByRole('heading',{name:'Automation strategy versus allocated buy & hold'})).toBeVisible();await expect(page.getByText('No recent successful cycle verified')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+});
+test('automation status fetch failures never appear as active trading',async({page})=>{
+ await page.route('**/automation/status.json',route=>route.fulfill({status:503,body:'unavailable'}));await page.goto('/');await page.getByRole('button',{name:'Automation',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Do not assume automation is running.');await expect(page.getByRole('heading',{name:'Worker: ready'})).toHaveCount(0);
 });

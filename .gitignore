@@ -4,3 +4,8 @@ dist/
 playwright-report/
 test-results/
 *.tsbuildinfo
+.env
+.env.*
+!.env.example
+runtime/
+*.log

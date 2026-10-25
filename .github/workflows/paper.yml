@@ -1,0 +1,70 @@
+name: Obsidian paper worker
+on:
+  schedule:
+    - cron: '7,22,37,52 13-22 * * 1-5'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['bot/**', 'scripts/state-sync.ts', '.github/workflows/paper.yml']
+permissions:
+  contents: read
+concurrency:
+  group: obsidian-paper-worker
+  cancel-in-progress: false
+jobs:
+  cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Restore durable risk state
+        run: node scripts/state-sync.ts restore
+      - name: Run paper cycle
+        id: cycle
+        continue-on-error: true
+        run: npm run bot:once
+        env:
+          APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}
+          APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
+          PAPER_REMOTE_STATE: 'true'
+          PAPER_KILL_SWITCH: ${{ vars.PAPER_KILL_SWITCH || 'false' }}
+      - name: Persist observations and errors
+        run: node scripts/state-sync.ts publish
+      - name: Surface broker failure
+        if: steps.cycle.outcome == 'failure'
+        run: echo '::warning::Broker cycle failed. No blind order retry was made. See the persisted worker status for the sanitized error.'
+      - name: Build dashboard with current observations
+        run: |
+          cp runtime/status.json public/automation/status.json
+          npm run build
+        env:
+          VITE_BASE_PATH: /trading-lab/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    needs: cycle
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - uses: actions/deploy-pages@v4
+        id: deployment

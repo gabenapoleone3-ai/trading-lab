@@ -1,6 +1,10 @@
 # Trading Lab
 
-A responsive React + TypeScript stock and ETF research dashboard for GitHub Pages. No server, API key, brokerage connection, real orders, or local installation is required to use the deployed website.
+A responsive React + TypeScript stock and ETF research dashboard for GitHub Pages, now with the Obsidian **paper-only** Alpaca automation worker. Website visitors need no local installation or API keys. Automated simulated broker orders run in a separate scheduled GitHub worker or resident container; GitHub Pages itself cannot run a trading process. There is no real-money trading mode.
+
+## Autonomous paper trading
+
+See [the deployment guide](deploy/README.md) for the supported paper integration, risk rules, free scheduled worker, resident container, secure credential setup, stop/recovery instructions, and limitations. The Automation tab shows real worker observations separately from historical simulations and stays explicitly blocked until a paper account is connected. Two repository secrets (`APCA_API_KEY_ID`, `APCA_API_SECRET_KEY`) are the unavoidable account prerequisite; never send their values in chat. No paid service is provisioned.
 
 ## Publish the permanent website
 
@@ -15,6 +19,7 @@ The workflow uses `/trading-lab/` as the asset base. For a renamed repository, u
 - Educational BUY / SELL / WAIT rules, explicitly distinguished from recommendations and forecasts.
 - Date-filtered, long-only backtests versus buy-and-hold, $10,000 starting cash, fractional adjusted units, configurable commission and adverse slippage, daily equity, returns, calendar-time CAGR, closing-equity drawdown, complete fills and JSON exports.
 - A separate $10,000 virtual paper portfolio with simulated buy/sell orders, no leverage or shorts, 10 bp commission, forward historical replay, positions, daily equity, trade history, local browser persistence, export and explicit reset.
+- Automated daily SMA decisions, Alpaca paper-only limit orders, idempotent recovery, cash/exposure limits, risk controls, broker reconciliation, persistent audit state and observed paper performance.
 - Responsive mobile and desktop interfaces, accessible form labels, visible loading/error/retry states, invalid-ledger recovery.
 
 ## Data: an old archive, not a live feed
@@ -48,6 +53,7 @@ Keep future development in this repository. Node.js 24 and npm are used in CI.
 ```sh
 npm ci
 npm test
+npm run backtest:report
 npx playwright install --with-deps chromium
 npm run test:e2e
 npm run build
@@ -65,3 +71,5 @@ VITE_BASE_PATH=/trading-lab/ npm run preview -- --port 4174
 ```
 
 Tests cover indicator reference values and edge cases, next-session fills, future-data independence, warmup, both sides of fees/slippage, benchmark parity, drawdown, invalid inputs, overspending/overselling, replay chronology, current-date-only valuation, source archive integrity, mobile/desktop browser flows, persistence, corrupted storage, and network failure/retry. Synthetic fixtures exist only in tests and are not shipped as market data.
+
+The new worker uses the existing indicator and risk-planning code; it does not replace the functioning historical research or browser portfolio. Run `npm run bot:once` for a single cycle or `npm run bot:start` for the resident worker. Missing credentials produce a truthful blocked status and no broker writes. Runtime state is ignored by Git; only the deployment workflow publishes sanitized paper observations to its state branch.

@@ -19,6 +19,10 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Restore latest automation snapshot
+        run: |
+          node scripts/state-sync.ts restore
+          cp runtime/status.json public/automation/status.json
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
@@ -31,6 +35,9 @@ jobs:
   deploy:
     if: github.event_name != 'pull_request'
     needs: build
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     permissions:
       pages: write
