@@ -3,7 +3,7 @@ import { analyze,historical,newForward,observe } from './analysis';
 import { freshQuote,marketData } from './data';
 import type { Credentials } from './data';
 import { decodeForward } from './storage';
-import { FRAMES,SELECTABLE,parseSymbol,periodEnd,unavailable } from './model';
+import { FRAMES,SELECTABLE,parseSymbol,periodEnd,snapshotExpiry,unavailable } from './model';
 import type { Context,Frame } from './model';
 export type Snapshot={updatedAt:number;context:Context;bars:Awaited<ReturnType<typeof marketData>>['bars'];quote:Awaited<ReturnType<typeof marketData>>['quote'];decision:ReturnType<typeof analyze>;historical:ReturnType<typeof historical>|null;forward:ReturnType<typeof newForward>|null;error:string;quoteNote:string;nextRefreshAt:number};
 const contextSchema=z.object({status:z.enum(['ok','unsupported']),symbol:z.string().max(30),exchange:z.string().max(20),frame:z.enum(['1','5','15','30','60','240','D','W']).nullable(),reason:z.string().max(500),manual:z.boolean().optional()});
@@ -35,7 +35,7 @@ async function refresh(ctx:Context):Promise<Snapshot>{
   return snapshot;
  })();inFlight.set(key,task);try{const snapshot=await task;await chrome.storage.session.set({['snapshot:'+key]:snapshot});return snapshot;}finally{inFlight.delete(key);}
 }
-async function badge(tabId:number,snapshot:Snapshot){try{await chrome.tabs.sendMessage(tabId,{type:'SUMMARY',signal:snapshot.decision.signal,expiresAt:snapshot.updatedAt+120000,manual:snapshot.context.manual===true,note:`${snapshot.context.manual?'Manual companion':'IEX companion'} · ${snapshot.context.symbol} · ${snapshot.decision.reasons[0]}`});}catch{/* Tab closed or navigated. */}}
+async function badge(tabId:number,snapshot:Snapshot){try{await chrome.tabs.sendMessage(tabId,{type:'SUMMARY',signal:snapshot.decision.signal,expiresAt:snapshotExpiry(snapshot.updatedAt,snapshot.quote?.time??null),manual:snapshot.context.manual===true,note:`${snapshot.context.manual?'Manual companion':'IEX companion'} · ${snapshot.context.symbol} · ${snapshot.decision.reasons[0]}`});}catch{/* Tab closed or navigated. */}}
 async function view(force=false){
  const [tab]=await chrome.tabs.query({active:true,lastFocusedWindow:true});if(!tab?.id)return {context:null,snapshot:null};
  const ctx=await context(tab.id);if(!ctx||ctx.status!=='ok')return {context:ctx,snapshot:null};

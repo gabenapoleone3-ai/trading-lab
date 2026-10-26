@@ -40,3 +40,4 @@ export function parseSymbol(value:string):{symbol:string;exchange:string}|null{
  return match?{exchange:match[1]??'',symbol:match[2]}:null;
 }
 export function displaySignal(signal:string,expiresAt:number,now:number){return expiresAt>now&&['BUY','SELL','WAIT'].includes(signal)?signal:'WAIT';}
+export function snapshotExpiry(updatedAt:number,quoteTime:number|null){return Math.min(updatedAt+120000,(quoteTime??updatedAt)+120000);}

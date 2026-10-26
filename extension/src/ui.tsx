@@ -1,7 +1,7 @@
 import { useEffect,useRef,useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import Chart from './Chart';
-import { COSTS,FRAMES,SELECTABLE } from './model';
+import { COSTS,FRAMES,SELECTABLE,snapshotExpiry } from './model';
 import type { Frame,Context } from './model';
 import type { Snapshot } from './background';
 import './style.css';
@@ -16,7 +16,7 @@ function Panel(){
  useEffect(()=>{void poll();const timer=setInterval(()=>{void poll();},2000);const listener=(m:{type:string})=>{if(m?.type==='CONTEXT_CHANGED'){generation.current++;setView(null);void poll();}};chrome.runtime.onMessage.addListener(listener);return()=>{generation.current++;clearInterval(timer);chrome.runtime.onMessage.removeListener(listener);};},[]);
  const snapshot=view?.snapshot,context=view?.context,decision=snapshot?.decision,forward=snapshot?.forward,historical=snapshot?.historical;
  // Never leave a formerly actionable badge/levels visible after its snapshot expires.
- const expired=!!snapshot&&Date.now()-snapshot.updatedAt>120000,signal=expired?'WAIT':decision?.signal??'WAIT';
+ const expired=!!snapshot&&Date.now()>=snapshotExpiry(snapshot.updatedAt,snapshot.quote?.time??null),signal=expired?'WAIT':decision?.signal??'WAIT';
  const activeDecision=expired?{...decision!,signal:'WAIT' as const,entry:null,exit:null,stop:null}:decision;
  async function reset(){if(confirm('Export first if needed. Reset the current watch’s forward portfolio and signal history to $10,000?')){try{await send({type:'RESET_FORWARD'});setView(null);await poll(true);}catch(e){setError((e as Error).message);}}}
  return <><header><div><strong>OBSIDIAN</strong><span>TradingView companion · paper only</span></div><button onClick={()=>{void send({type:'OPEN_OPTIONS'});}}>Connection & settings</button></header><main>
