@@ -35,7 +35,7 @@ async function refresh(ctx:Context):Promise<Snapshot>{
   return snapshot;
  })();inFlight.set(key,task);try{const snapshot=await task;await chrome.storage.session.set({['snapshot:'+key]:snapshot});return snapshot;}finally{inFlight.delete(key);}
 }
-async function badge(tabId:number,snapshot:Snapshot){try{await chrome.tabs.sendMessage(tabId,{type:'SUMMARY',signal:snapshot.decision.signal,note:`${snapshot.context.manual?'Manual companion':'IEX companion'} · ${snapshot.context.symbol} · ${snapshot.decision.reasons[0]}`});}catch{/* Tab closed or navigated. */}}
+async function badge(tabId:number,snapshot:Snapshot){try{await chrome.tabs.sendMessage(tabId,{type:'SUMMARY',signal:snapshot.decision.signal,expiresAt:snapshot.updatedAt+120000,manual:snapshot.context.manual===true,note:`${snapshot.context.manual?'Manual companion':'IEX companion'} · ${snapshot.context.symbol} · ${snapshot.decision.reasons[0]}`});}catch{/* Tab closed or navigated. */}}
 async function view(force=false){
  const [tab]=await chrome.tabs.query({active:true,lastFocusedWindow:true});if(!tab?.id)return {context:null,snapshot:null};
  const ctx=await context(tab.id);if(!ctx||ctx.status!=='ok')return {context:ctx,snapshot:null};

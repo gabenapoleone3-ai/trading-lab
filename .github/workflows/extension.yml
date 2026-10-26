@@ -5,6 +5,11 @@ on:
     paths: ['extension/**', 'scripts/build-extension.mjs', 'src/engine.ts', 'package*.json', '.github/workflows/extension.yml']
   pull_request:
   workflow_dispatch:
+    inputs:
+      live_tradingview:
+        description: Run the opt-in public Supercharts smoke test
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -22,6 +27,13 @@ jobs:
       - run: npm run extension:build
       - run: npx playwright install --with-deps chromium
       - run: npm run extension:test
+        env:
+          OBSIDIAN_LIVE_SITE_TEST: ${{ github.event.inputs.live_tradingview || 'false' }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: extension-test-diagnostics
+          path: test-results/
       - uses: actions/upload-artifact@v4
         with:
           name: obsidian-chrome-extension

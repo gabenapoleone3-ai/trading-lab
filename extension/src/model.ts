@@ -39,3 +39,4 @@ export function parseSymbol(value:string):{symbol:string;exchange:string}|null{
  const v=value.trim().toUpperCase();const match=/^(?:(NASDAQ|NYSE|AMEX|ARCA|NYSEARCA|BATS):)?([A-Z][A-Z0-9.-]{0,14})$/.exec(v);
  return match?{exchange:match[1]??'',symbol:match[2]}:null;
 }
+export function displaySignal(signal:string,expiresAt:number,now:number){return expiresAt>now&&['BUY','SELL','WAIT'].includes(signal)?signal:'WAIT';}

@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import { analyze,historical,newForward,observe,statistics } from './analysis';
-import {completed,parseFrame,parseSymbol,periodEnd,unavailable} from './model';
+import {completed,displaySignal,parseFrame,parseSymbol,periodEnd,unavailable} from './model';
 import { api,freshQuote,parseBars } from './data';
 import {decodeForward} from './storage';
 import {chartGeometry} from './Chart';
@@ -22,6 +22,7 @@ describe('forward observations are separate from backfilled simulations',()=>{
 });
 describe('provider times, coordinates and trust boundaries',()=>{
  it('handles NY daylight saving boundaries and never includes incomplete bars',()=>{expect(periodEnd(Date.parse('2026-11-01T04:00:00Z'),'D')).toBe(Date.parse('2026-11-02T05:00:00Z'));const {bars}=fixtures();expect(completed([...bars,{...bars[0],time:NOW}],'60',NOW)).toHaveLength(bars.length);});
+ it('expires the page badge rather than leaving an old actionable signal visible',()=>{expect(displaySignal('BUY',NOW-1,NOW)).toBe('WAIT');expect(displaySignal('BUY',NOW+1000,NOW)).toBe('BUY');expect(displaySignal('malformed',NOW+1000,NOW)).toBe('WAIT');});
  it('normalizes supported intervals and refuses crypto namespaces and tick/range charts',()=>{expect(parseFrame('1h')).toBe('60');expect(parseFrame('15m')).toBe('15');expect(parseFrame('1D')).toBe('D');expect(parseFrame('10R')).toBeNull();expect(parseSymbol('NASDAQ:AAPL')).toEqual({symbol:'AAPL',exchange:'NASDAQ'});expect(parseSymbol('BINANCE:BTCUSDT')).toBeNull();});
  it('maps exact provider timestamps and prices on the companion chart only',()=>{const {bars}=fixtures(),visible=bars.slice(-20),g=chartGeometry(visible);expect(g.x(visible[0].time)).toBeCloseTo(55+.5*775/20);expect(g.x(visible.at(-1)!.time)).toBeCloseTo(55+19.5*775/20);expect(g.y(g.high)).toBeCloseTo(20);expect(g.y(g.low)).toBeCloseTo(280);});
  it('validates real provider payload shape and refuses duplicate/future/nonfinite prices',()=>{const b={t:'2026-10-22T04:00:00Z',o:100,h:101,l:99,c:100,v:100};expect(parseBars({bars:[b]},NOW)[0].close).toBe(100);expect(()=>parseBars({bars:[b,b]},NOW)).toThrow();expect(()=>parseBars({bars:[{...b,c:-1}]},NOW)).toThrow();});
