@@ -62,3 +62,7 @@ npm run extension:test
 ```
 
 The extension build does not replace the existing dashboard build. It produces `extension/build/` (load this folder unpacked), `releases/obsidian-extension-v1.0.0.zip`, and a SHA-256 checksum. The ZIP contains only the built extension and dependency notices, never `.env`, source tests, browser profiles or runtime state. Production extension CSP uses self-hosted scripts and the data API only. CI builds/tests and uploads the ZIP independently of Pages. Extension integration tests use an isolated Playwright Chrome for Testing profile and **explicit synthetic provider fixtures only in tests**, with no broker credentials or real requests. They must not be represented as authenticated live-data tests. The system-managed browser's policies must remain unchanged.
+
+## Recorded validation
+
+See [VALIDATION.md](VALIDATION.md) for exact test outcomes, the actual public Supercharts smoke-test run, and the distinction between synthetic provider tests and authenticated live data.
