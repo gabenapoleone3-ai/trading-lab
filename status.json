@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "mode": "paper",
   "source": "Alpaca paper account + IEX single-exchange market data",
-  "updatedAt": "2026-10-30T22:38:26.230Z",
+  "updatedAt": "2026-10-31T01:53:56.032Z",
   "lastSuccess": null,
   "status": "blocked",
   "message": "Missing Alpaca paper API credentials. No automated broker trading has started.",
