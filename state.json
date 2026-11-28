@@ -2,7 +2,7 @@
   "version": 1,
   "accountFingerprint": null,
   "startedAt": null,
-  "updatedAt": "2026-11-27T21:55:35.605Z",
+  "updatedAt": "2026-11-28T03:50:54.986Z",
   "lastSuccess": null,
   "status": "blocked",
   "message": "Missing Alpaca paper API credentials. No automated broker trading has started.",
